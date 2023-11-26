@@ -36,6 +36,11 @@ import { Icon } from '@iconify/vue'
               class="rounded-md px-3 py-2 text-sm text-gray-400 hover:bg-gray-700 hover:text-white"
               >About</router-link
             >
+            <router-link
+              to="/auth"
+              class="rounded-md px-3 py-2 text-sm text-gray-400 hover:bg-gray-700 hover:text-white"
+              >Auth</router-link
+            >
           </div>
         </div>
       </div>
