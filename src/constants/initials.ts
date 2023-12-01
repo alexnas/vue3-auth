@@ -11,15 +11,4 @@ const initUser: IUser = {
   updatedAt: ''
 }
 
-const sampleUser: IUser = {
-  id: 234234234234234,
-  name: 'SAMPLE',
-  email: 'sample@gmail.com',
-  password: '',
-  roleId: -1,
-  isActive: true,
-  createdAt: '',
-  updatedAt: ''
-}
-
-export { initUser, sampleUser }
+export { initUser }

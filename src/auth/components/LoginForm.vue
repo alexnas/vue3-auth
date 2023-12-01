@@ -4,8 +4,10 @@ import { Icon } from '@iconify/vue'
 import { useForm } from 'vee-validate'
 import * as yup from 'yup'
 import { useAuthStore } from '@/auth/stores/auth'
+import { storeToRefs } from 'pinia'
 
 const authStore = useAuthStore()
+const { error } = storeToRefs(authStore)
 
 defineEmits(['toggle-auth'])
 const passwordShow = ref(false)
@@ -20,8 +22,8 @@ const toggleShowPassword = () => {
 }
 
 const initialLoginData = {
-  email: 'sss@sss.sss',
-  password: '345345345'
+  email: 'www1@aaa.aaa',
+  password: '123123123'
 }
 
 const resetLoginData = {
@@ -47,6 +49,24 @@ const onSubmit = handleSubmit.withControlled(async (values) => {
 <template>
   <form @submit="onSubmit">
     <div class="mt-2 space-y-8 px-4 pt-8 text-base leading-6 text-gray-700 sm:text-lg sm:leading-7">
+      <div
+        v-if="error && error.length > 0"
+        class="mb-6 flex gap-3 rounded-md border border-red-500 bg-red-50 p-4"
+      >
+        <svg
+          class="h-5 w-5 text-red-400"
+          xmlns="http://www.w3.org/2000/svg"
+          viewBox="0 0 24 24"
+          fill="currentColor"
+        >
+          <path
+            fill-rule="evenodd"
+            d="M2.25 12c0-5.385 4.365-9.75 9.75-9.75s9.75 4.365 9.75 9.75-4.365 9.75-9.75 9.75S2.25 17.385 2.25 12zM12 8.25a.75.75 0 01.75.75v3.75a.75.75 0 01-1.5 0V9a.75.75 0 01.75-.75zm0 8.25a.75.75 0 100-1.5.75.75 0 000 1.5z"
+            clip-rule="evenodd"
+          />
+        </svg>
+        <h3 class="text-sm font-medium text-red-800">{{ error }}</h3>
+      </div>
       <div class="relative">
         <input
           autocomplete="off"

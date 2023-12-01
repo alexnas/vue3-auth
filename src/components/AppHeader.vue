@@ -27,19 +27,20 @@ const handleAuthUser = () => {
     <div class="mx-auto px-2 sm:px-6 lg:px-8">
       <div class="relative flex h-16 items-center justify-between">
         <div class="flex items-center">
-          <router-link to="/" class="flex items-end text-orange-400 hover:text-teal-600">
-            <Icon class="text-3xl" icon="iconoir:vue-js" :inline="true" />
-            <Icon class="-ml-2 text-2xl" icon="fa6-solid:a" :inline="true" />
+          <router-link to="/" class="flex items-end">
+            <div class="flex items-end text-orange-400 hover:text-teal-600">
+              <Icon class="text-3xl" icon="iconoir:vue-js" :inline="true" />
+              <Icon class="-mb-1 -ml-3 text-2xl text-gray-200" icon="fa6-solid:a" :inline="true" />
+            </div>
           </router-link>
 
           <router-link
             to="/"
-            class="rounded-md px-3 py-2 text-lg font-medium text-gray-300 hover:bg-gray-700 hover:text-orange-400"
+            class="rounded-md px-3 py-2 text-lg font-medium text-gray-300 hover:text-orange-400"
             aria-current="page"
             >Vue3-Auth</router-link
           >
         </div>
-
         <div class="flex justify-end sm:items-stretch sm:justify-start">
           <div class="flex items-center">
             <router-link
