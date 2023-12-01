@@ -11,22 +11,20 @@ const routes: Array<RouteRecordRaw> = [
     meta: { layout: DefaultLayout }
   },
   {
-    path: '/',
-    name: 'home',
-    component: () => import('@/views/HomeView.vue'),
-    meta: { layout: DefaultLayout }
-  },
-  {
     path: '/about',
     name: 'about',
     component: () => import('@/views/AboutView.vue'),
-    meta: { layout: DefaultLayout }
+    meta: {
+      layout: DefaultLayout,
+      authRequired: true
+    }
   },
+
   ...authRoutes,
   {
     path: '/:pathMatch(.*)*',
     name: 'NotFound',
-    component: () => import('../views/NotFoundView.vue'),
+    component: () => import('@/views/NotFoundView.vue'),
     meta: { layout: SimpleLayoutVue }
   }
 ]
