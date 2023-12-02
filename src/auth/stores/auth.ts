@@ -17,6 +17,16 @@ export const useAuthStore = defineStore('auth', () => {
   const loading = ref(false)
   const error = ref<string | null>(null)
 
+  const checkDbConnection = async () => {
+    try {
+      await AuthService.checkIfDbConnected()
+    } catch (err: any) {
+      loading.value = false
+      error.value = 'Web connection was lost'
+      console.log('Error', err)
+    }
+  }
+
   const login = async (email: string, password: string) => {
     loading.value = true
     error.value = null
@@ -45,9 +55,9 @@ export const useAuthStore = defineStore('auth', () => {
     try {
       loading.value = true
       error.value = null
+      removeToken()
       await AuthService.logout()
 
-      removeToken()
       loading.value = false
       error.value = null
     } catch (err: any) {
@@ -74,5 +84,15 @@ export const useAuthStore = defineStore('auth', () => {
     return
   }
 
-  return { isAuth, loggedUser, loading, error, login, logout, setupToken, removeToken }
+  return {
+    isAuth,
+    loggedUser,
+    loading,
+    error,
+    checkDbConnection,
+    login,
+    logout,
+    setupToken,
+    removeToken
+  }
 })

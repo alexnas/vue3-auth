@@ -40,7 +40,11 @@ const [email, emailAttrs] = defineField('email')
 const [password, passwordAttrs] = defineField('password')
 
 const onSubmit = handleSubmit.withControlled(async (values) => {
-  await authStore.login(values.email, values.password)
+  await authStore.checkDbConnection()
+  if (!error.value) {
+    console.log('ERROR VALUE ===================', error.value)
+    await authStore.login(values.email, values.password)
+  }
 
   resetForm({ values: resetLoginData })
 })
