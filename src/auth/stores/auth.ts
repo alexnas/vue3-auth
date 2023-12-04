@@ -1,6 +1,7 @@
 import { ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { defineStore } from 'pinia'
+import axios from 'axios'
 import type { IUser } from '@/types'
 import { initUser } from '@/constants/initials'
 import AuthService from '@/auth/services/authService'
@@ -13,16 +14,32 @@ export const useAuthStore = defineStore('auth', () => {
       ? { ...JSON.parse(String(localStorage.getItem('user'))) }
       : { ...initUser }
   )
+  const isDbConnected = ref(true)
+  const dbConnectionMsg = ref('Something test for connection')
   const loading = ref(false)
   const error = ref<string | null>(null)
 
   const checkDbConnection = async () => {
+    loading.value = true
+    error.value = null
+
     try {
-      await AuthService.checkIfDbConnected()
+      const { data } = await AuthService.checkIfDbConnected()
+      isDbConnected.value = data.isDbConnected
+      dbConnectionMsg.value = data.dbConnectionMsg
+      loading.value = false
     } catch (err: any) {
       loading.value = false
-      error.value = 'Web connection was lost'
-      console.log('Error', err)
+
+      if (axios.isAxiosError(err)) {
+        isDbConnected.value = false
+        dbConnectionMsg.value = 'Server connection was lost'
+        error.value = err.message
+        console.log('Axios Error', err.message)
+      } else {
+        error.value = 'Unexpected error encountered'
+        console.log('Error', err)
+      }
     }
   }
 
@@ -35,9 +52,7 @@ export const useAuthStore = defineStore('auth', () => {
       setupToken(response.data)
 
       router.replace({ name: 'home' })
-
       loading.value = false
-      error.value = null
     } catch (err: any) {
       loading.value = false
       if (+err?.response.status === 403) {
@@ -59,9 +74,7 @@ export const useAuthStore = defineStore('auth', () => {
       setupToken(response.data)
 
       router.replace({ name: 'home' })
-
       loading.value = false
-      error.value = null
     } catch (err: any) {
       loading.value = false
       if (+err?.response.status === 409) {
@@ -75,14 +88,12 @@ export const useAuthStore = defineStore('auth', () => {
   }
 
   const logout = async () => {
+    loading.value = true
+    error.value = null
     try {
-      loading.value = true
-      error.value = null
       removeToken()
       await AuthService.logout()
-
       loading.value = false
-      error.value = null
     } catch (err: any) {
       loading.value = false
       error.value = 'Unexpected error encountered'
@@ -110,6 +121,8 @@ export const useAuthStore = defineStore('auth', () => {
   return {
     isAuth,
     loggedUser,
+    isDbConnected,
+    dbConnectionMsg,
     loading,
     error,
     checkDbConnection,

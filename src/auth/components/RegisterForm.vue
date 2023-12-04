@@ -7,7 +7,7 @@ import * as yup from 'yup'
 import { useAuthStore } from '@/auth/stores/auth'
 
 const authStore = useAuthStore()
-const { error } = storeToRefs(authStore)
+const { isDbConnected, dbConnectionMsg, error } = storeToRefs(authStore)
 
 defineEmits(['toggle-auth'])
 const passwordShow = ref(false)
@@ -52,7 +52,7 @@ const [confirmPassword, confirmPasswordAttrs] = defineField('confirm_password')
 
 const onSubmit = handleSubmit.withControlled(async (values) => {
   await authStore.checkDbConnection()
-  if (!error.value) {
+  if (isDbConnected && !error.value) {
     await authStore.register(values.email, values.name, values.password)
     resetForm({ values: resetRegisterData })
   }
@@ -61,24 +61,16 @@ const onSubmit = handleSubmit.withControlled(async (values) => {
 
 <template>
   <form @submit.prevent="onSubmit">
-    <div class="mt-2 space-y-8 px-4 pt-8 text-base leading-6 text-gray-700 sm:text-lg sm:leading-7">
+    <div
+      class="mt-2 space-y-8 px-4 pt-8 text-base leading-6 text-orange-500 sm:text-lg sm:leading-7"
+    >
       <div
-        v-if="error && error.length > 0"
-        class="mb-6 flex gap-3 rounded-md border border-red-500 bg-red-50 p-4"
+        v-if="!isDbConnected"
+        class="mb-6 flex items-center justify-between gap-1 rounded-md border border-orange-500 bg-orange-50 p-4"
       >
-        <svg
-          class="h-5 w-5 text-red-400"
-          xmlns="http://www.w3.org/2000/svg"
-          viewBox="0 0 24 24"
-          fill="currentColor"
-        >
-          <path
-            fill-rule="evenodd"
-            d="M2.25 12c0-5.385 4.365-9.75 9.75-9.75s9.75 4.365 9.75 9.75-4.365 9.75-9.75 9.75S2.25 17.385 2.25 12zM12 8.25a.75.75 0 01.75.75v3.75a.75.75 0 01-1.5 0V9a.75.75 0 01.75-.75zm0 8.25a.75.75 0 100-1.5.75.75 0 000 1.5z"
-            clip-rule="evenodd"
-          />
-        </svg>
-        <h3 class="text-sm font-medium text-red-800">{{ error }}</h3>
+        <div>{{ dbConnectionMsg }}</div>
+
+        <Icon class="w-8 text-2xl" :icon="'icon-park-solid:attention'" :inline="true" />
       </div>
 
       <div class="relative">
@@ -89,6 +81,7 @@ const onSubmit = handleSubmit.withControlled(async (values) => {
           type="text"
           v-model="name"
           v-bind="nameAttrs"
+          v-on:blur="authStore.checkDbConnection()"
           class="peer h-10 w-full border-b-2 border-gray-300 text-gray-900 placeholder-transparent focus:border-teal-600 focus:outline-none"
           placeholder="Username"
         />
@@ -108,6 +101,7 @@ const onSubmit = handleSubmit.withControlled(async (values) => {
           type="text"
           v-model="email"
           v-bind="emailAttrs"
+          v-on:blur="authStore.checkDbConnection()"
           class="peer h-10 w-full border-b-2 border-gray-300 text-gray-900 placeholder-transparent focus:border-teal-600 focus:outline-none"
           placeholder="Email address"
         />
