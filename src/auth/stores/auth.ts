@@ -13,7 +13,6 @@ export const useAuthStore = defineStore('auth', () => {
       ? { ...JSON.parse(String(localStorage.getItem('user'))) }
       : { ...initUser }
   )
-
   const loading = ref(false)
   const error = ref<string | null>(null)
 
@@ -44,6 +43,30 @@ export const useAuthStore = defineStore('auth', () => {
       if (+err?.response.status === 403) {
         error.value = '403 Forbidden Error. Check your login and password.'
         console.log('Error 403. Check your login and password.', err)
+      } else {
+        error.value = 'Something went wrong...'
+        console.log('Unexpected error', err)
+      }
+    }
+  }
+
+  const register = async (email: string, name: string, password: string) => {
+    loading.value = true
+    error.value = null
+
+    try {
+      const response = await AuthService.register(email, name, password)
+      setupToken(response.data)
+
+      router.replace({ name: 'home' })
+
+      loading.value = false
+      error.value = null
+    } catch (err: any) {
+      loading.value = false
+      if (+err?.response.status === 409) {
+        error.value = 'Change your email. Chosen email is busy.'
+        console.log('Signup Error 409. Change your email.', err)
       } else {
         error.value = 'Something went wrong...'
         console.log('Unexpected error', err)
@@ -91,6 +114,7 @@ export const useAuthStore = defineStore('auth', () => {
     error,
     checkDbConnection,
     login,
+    register,
     logout,
     setupToken,
     removeToken

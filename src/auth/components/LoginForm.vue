@@ -1,10 +1,10 @@
 <script setup lang="ts">
 import { ref } from 'vue'
+import { storeToRefs } from 'pinia'
 import { Icon } from '@iconify/vue'
 import { useForm } from 'vee-validate'
 import * as yup from 'yup'
 import { useAuthStore } from '@/auth/stores/auth'
-import { storeToRefs } from 'pinia'
 
 const authStore = useAuthStore()
 const { error } = storeToRefs(authStore)
@@ -42,11 +42,9 @@ const [password, passwordAttrs] = defineField('password')
 const onSubmit = handleSubmit.withControlled(async (values) => {
   await authStore.checkDbConnection()
   if (!error.value) {
-    console.log('ERROR VALUE ===================', error.value)
     await authStore.login(values.email, values.password)
+    resetForm({ values: resetLoginData })
   }
-
-  resetForm({ values: resetLoginData })
 })
 </script>
 
@@ -71,6 +69,7 @@ const onSubmit = handleSubmit.withControlled(async (values) => {
         </svg>
         <h3 class="text-sm font-medium text-red-800">{{ error }}</h3>
       </div>
+
       <div class="relative">
         <input
           autocomplete="off"
@@ -133,6 +132,7 @@ const onSubmit = handleSubmit.withControlled(async (values) => {
         <p class="ml-3 mt-2 text-sm font-light text-gray-500">
           <span>Don't have an account yet? </span>
           <button
+            type="button"
             @click="$emit('toggle-auth')"
             class="ml-2 p-2 font-medium text-teal-600 hover:bg-gray-100 hover:text-orange-600"
           >
