@@ -7,7 +7,7 @@ import * as yup from 'yup'
 import { useAuthStore } from '@/auth/stores/auth'
 
 const authStore = useAuthStore()
-const { isDbConnected, dbConnectionMsg, error } = storeToRefs(authStore)
+const { error } = storeToRefs(authStore)
 
 defineEmits(['toggle-auth'])
 const passwordShow = ref(false)
@@ -27,7 +27,7 @@ const initialLoginData = {
 }
 
 const resetLoginData = {
-  email: 'reset@email.com',
+  email: '',
   password: ''
 }
 
@@ -41,10 +41,10 @@ const [password, passwordAttrs] = defineField('password')
 
 const onSubmit = handleSubmit.withControlled(async (values) => {
   await authStore.checkDbConnection()
-  if (isDbConnected && !error.value) {
-    await authStore.login(values.email, values.password)
-    resetForm({ values: resetLoginData })
-  }
+  if (error.value) return
+  await authStore.login(values.email, values.password)
+  if (error.value) return
+  resetForm({ values: resetLoginData })
 })
 </script>
 
@@ -54,11 +54,10 @@ const onSubmit = handleSubmit.withControlled(async (values) => {
       class="mt-2 space-y-8 px-4 pt-8 text-base leading-6 text-orange-500 sm:text-lg sm:leading-7"
     >
       <div
-        v-if="!isDbConnected"
+        v-if="error"
         class="mb-6 flex items-center justify-between gap-1 rounded-md border border-orange-500 bg-orange-50 p-4"
       >
-        <div>{{ dbConnectionMsg }}</div>
-
+        <div>{{ error }}</div>
         <Icon class="w-8 text-2xl" :icon="'icon-park-solid:attention'" :inline="true" />
       </div>
 

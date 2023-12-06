@@ -14,32 +14,19 @@ export const useAuthStore = defineStore('auth', () => {
       ? { ...JSON.parse(String(localStorage.getItem('user'))) }
       : { ...initUser }
   )
-  const isDbConnected = ref(true)
-  const dbConnectionMsg = ref('Something test for connection')
   const loading = ref(false)
   const error = ref<string | null>(null)
 
   const checkDbConnection = async () => {
     loading.value = true
     error.value = null
-
     try {
-      const { data } = await AuthService.checkIfDbConnected()
-      isDbConnected.value = data.isDbConnected
-      dbConnectionMsg.value = data.dbConnectionMsg
+      await AuthService.checkIfDbConnected()
       loading.value = false
     } catch (err: any) {
       loading.value = false
-
-      if (axios.isAxiosError(err)) {
-        isDbConnected.value = false
-        dbConnectionMsg.value = 'Server connection was lost'
-        error.value = err.message
-        console.log('Axios Error', err.message)
-      } else {
-        error.value = 'Unexpected error encountered'
-        console.log('Error', err)
-      }
+      error.value = 'Network Error. Check your connection.'
+      console.log(err.message, 'Network Error. Check your connection.')
     }
   }
 
@@ -57,10 +44,13 @@ export const useAuthStore = defineStore('auth', () => {
       loading.value = false
       if (+err?.response.status === 403) {
         error.value = '403 Forbidden Error. Check your login and password.'
-        console.log('Error 403. Check your login and password.', err)
+        console.log('403 Forbidden Error. Check your login and password.', err)
+      } else if (axios.isAxiosError(err)) {
+        error.value = err.message
+        console.log('Error', err, err.message)
       } else {
-        error.value = 'Something went wrong...'
-        console.log('Unexpected error', err)
+        error.value = 'Unexpected error encountered'
+        console.log('Error', err)
       }
     }
   }
@@ -78,11 +68,14 @@ export const useAuthStore = defineStore('auth', () => {
     } catch (err: any) {
       loading.value = false
       if (+err?.response.status === 409) {
-        error.value = 'Change your email. Chosen email is busy.'
-        console.log('Signup Error 409. Change your email.', err)
+        error.value = 'This email is in use already. Change your email.'
+        console.log('Signup Error 409.  Chosen email is in use already.', err)
+      } else if (axios.isAxiosError(err)) {
+        error.value = err.message
+        console.log('Error', err, err.message)
       } else {
-        error.value = 'Something went wrong...'
-        console.log('Unexpected error', err)
+        error.value = 'Unexpected error encountered'
+        console.log('Error', err)
       }
     }
   }
@@ -121,8 +114,6 @@ export const useAuthStore = defineStore('auth', () => {
   return {
     isAuth,
     loggedUser,
-    isDbConnected,
-    dbConnectionMsg,
     loading,
     error,
     checkDbConnection,
