@@ -1,8 +1,13 @@
 <script setup lang="ts">
 import { ref } from 'vue'
+import { storeToRefs } from 'pinia'
 import { Icon } from '@iconify/vue'
-import { Form, Field, ErrorMessage } from 'vee-validate'
+import { useForm } from 'vee-validate'
 import * as yup from 'yup'
+import { useAuthStore } from '@/auth/stores/auth'
+
+const authStore = useAuthStore()
+const { error } = storeToRefs(authStore)
 
 defineEmits(['toggle-auth'])
 const passwordShow = ref(false)
@@ -21,20 +26,61 @@ const toggleShowPassword = () => {
   passwordShow.value = !passwordShow.value
 }
 
-function onSubmit(values: any) {
-  alert(JSON.stringify(values, null, 2))
+const initialRegisterData = {
+  name: 'test name',
+  email: 'www1@aaa.aaa',
+  password: '123123123',
+  confirm_password: '123123123'
 }
+
+const resetRegisterData = {
+  name: '',
+  email: '',
+  password: '',
+  confirm_password: ''
+}
+
+const { handleSubmit, defineField, resetForm, meta, errors } = useForm({
+  validationSchema: registerSchema,
+  initialValues: initialRegisterData
+})
+
+const [name, nameAttrs] = defineField('name')
+const [email, emailAttrs] = defineField('email')
+const [password, passwordAttrs] = defineField('password')
+const [confirmPassword, confirmPasswordAttrs] = defineField('confirm_password')
+
+const onSubmit = handleSubmit.withControlled(async (values) => {
+  await authStore.checkDbConnection()
+  if (error.value) return
+  await authStore.register(values.email, values.name, values.password)
+  if (error.value) return
+  resetForm({ values: resetRegisterData })
+})
 </script>
 
 <template>
-  <Form @submit="onSubmit" :validation-schema="registerSchema" v-slot="{ meta }">
-    <div class="space-y-4 px-4 py-8 text-base leading-6 text-gray-700 sm:text-lg sm:leading-7">
+  <form @submit.prevent="onSubmit">
+    <div
+      class="mt-2 space-y-8 px-4 pt-8 text-base leading-6 text-orange-500 sm:text-lg sm:leading-7"
+    >
+      <div
+        v-if="error"
+        class="mb-6 flex items-center justify-between gap-1 rounded-md border border-orange-500 bg-orange-50 p-4"
+      >
+        <div>{{ error }}</div>
+        <Icon class="w-8 text-2xl" :icon="'icon-park-solid:attention'" :inline="true" />
+      </div>
+
       <div class="relative">
-        <Field
+        <input
           autocomplete="off"
           id="name"
           name="name"
           type="text"
+          v-model="name"
+          v-bind="nameAttrs"
+          v-on:blur="authStore.checkDbConnection()"
           class="peer h-10 w-full border-b-2 border-gray-300 text-gray-900 placeholder-transparent focus:border-teal-600 focus:outline-none"
           placeholder="Username"
         />
@@ -43,15 +89,18 @@ function onSubmit(values: any) {
           class="peer-placeholder-shown:text-gray-440 absolute -top-3.5 left-0 pl-2 text-sm text-gray-600 transition-all peer-placeholder-shown:top-2 peer-placeholder-shown:text-base peer-focus:-top-3.5 peer-focus:text-sm peer-focus:text-gray-600"
           >Username</label
         >
-        <ErrorMessage class="flex justify-end text-sm text-orange-400" name="name" />
+        <div class="flex justify-end text-sm text-orange-400">{{ errors.name }}</div>
       </div>
 
       <div class="relative">
-        <Field
+        <input
           autocomplete="off"
           id="email"
           name="email"
-          type="email"
+          type="text"
+          v-model="email"
+          v-bind="emailAttrs"
+          v-on:blur="authStore.checkDbConnection()"
           class="peer h-10 w-full border-b-2 border-gray-300 text-gray-900 placeholder-transparent focus:border-teal-600 focus:outline-none"
           placeholder="Email address"
         />
@@ -60,15 +109,17 @@ function onSubmit(values: any) {
           class="peer-placeholder-shown:text-gray-440 absolute -top-3.5 left-0 pl-2 text-sm text-gray-600 transition-all peer-placeholder-shown:top-2 peer-placeholder-shown:text-base peer-focus:-top-3.5 peer-focus:text-sm peer-focus:text-gray-600"
           >Email Address</label
         >
-        <ErrorMessage class="flex justify-end text-sm text-orange-400" name="email" />
+        <div class="flex justify-end text-sm text-orange-400">{{ errors.email }}</div>
       </div>
 
       <div>
         <div class="relative flex">
-          <Field
+          <input
             autocomplete="off"
             id="password"
             name="password"
+            v-model="password"
+            v-bind="passwordAttrs"
             :type="passwordShow ? 'text' : 'password'"
             class="peer h-10 w-full border-b-2 border-gray-300 text-gray-900 placeholder-transparent focus:border-teal-600 focus:outline-none"
             placeholder="Password"
@@ -89,25 +140,26 @@ function onSubmit(values: any) {
             />
           </button>
         </div>
-        <ErrorMessage class="flex justify-end text-sm text-orange-400" name="password" />
+        <div class="flex justify-end text-sm text-orange-400">{{ errors.password }}</div>
       </div>
 
       <div>
         <div class="relative flex">
-          <Field
+          <input
             autocomplete="off"
             id="confirm_password"
             name="confirm_password"
+            v-model="confirmPassword"
+            v-bind="confirmPasswordAttrs"
             :type="passwordShow ? 'text' : 'password'"
             class="peer h-10 w-full border-b-2 border-gray-300 text-gray-900 placeholder-transparent focus:border-teal-600 focus:outline-none"
             placeholder="Confirm Password"
           />
           <label
             for="confirm_password"
-            class="peer-placeholder-shown:text-gray-440 absolute -top-3.5 left-0 text-sm text-gray-600 transition-all peer-placeholder-shown:top-2 peer-placeholder-shown:text-base peer-focus:-top-3.5 peer-focus:text-sm peer-focus:text-gray-600"
+            class="peer-placeholder-shown:text-gray-440 absolute -top-3.5 left-0 pl-2 text-sm text-gray-600 transition-all peer-placeholder-shown:top-2 peer-placeholder-shown:text-base peer-focus:-top-3.5 peer-focus:text-sm peer-focus:text-gray-600"
             >Confirm Password</label
           >
-
           <button
             class="absolute right-0 top-0 inline-flex h-full w-10 items-center justify-center text-gray-400"
             @click.prevent="toggleShowPassword"
@@ -119,7 +171,7 @@ function onSubmit(values: any) {
             />
           </button>
         </div>
-        <ErrorMessage class="flex justify-end text-sm text-orange-400" name="confirm_password" />
+        <div class="flex justify-end text-sm text-orange-400">{{ errors.confirm_password }}</div>
       </div>
 
       <div class="relative">
@@ -134,6 +186,7 @@ function onSubmit(values: any) {
         <p class="ml-3 mt-2 text-sm font-light text-gray-500">
           <span>Have an account already? </span>
           <button
+            type="button"
             @click="$emit('toggle-auth')"
             class="ml-2 p-2 font-medium text-teal-600 hover:bg-gray-100 hover:text-orange-600"
           >
@@ -142,5 +195,5 @@ function onSubmit(values: any) {
         </p>
       </div>
     </div>
-  </Form>
+  </form>
 </template>
