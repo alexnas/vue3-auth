@@ -22,11 +22,6 @@ const toggleShowPassword = () => {
 }
 
 const initialLoginData = {
-  email: 'www1@aaa.aaa',
-  password: '123123123'
-}
-
-const resetLoginData = {
   email: '',
   password: ''
 }
@@ -44,7 +39,7 @@ const onSubmit = handleSubmit.withControlled(async (values) => {
   if (error.value) return
   await authStore.login(values.email, values.password)
   if (error.value) return
-  resetForm({ values: resetLoginData })
+  resetForm({ values: initialLoginData })
 })
 </script>
 
