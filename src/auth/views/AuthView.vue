@@ -3,7 +3,10 @@ import { computed, ref } from 'vue'
 import AuthViewContainer from '@/auth/views/AuthViewContainer.vue'
 import AuthFormContainer from '@/auth/views/AuthFormContainer.vue'
 import LoginForm from '@/auth/components/LoginForm.vue'
-import RegisterForm from '../components/RegisterForm.vue'
+import RegisterForm from '@/auth/components/RegisterForm.vue'
+import { useAuthStore } from '@/auth/stores/auth'
+
+const authStore = useAuthStore()
 
 const pageTitle = 'Authentication'
 const isLoginForm = ref(true)
@@ -13,6 +16,7 @@ const formTitle = computed(() => {
 })
 
 const toggleAuth = () => {
+  authStore.cleanError()
   return (isLoginForm.value = !isLoginForm.value)
 }
 </script>
