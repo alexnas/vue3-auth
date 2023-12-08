@@ -2,7 +2,7 @@
 
 This app intended to provide JWT auth functionality (user login/register based on JWT) for the companible Vue 3 application (see used technologies). The app is based on the widespread JWT authentication algorithm. Supports Pinia state management, form validation, Typescript.
 
-# Adopt this this JWT Auth fuctionality into your project
+# Adopt this JWT Auth fuctionality into your project
 
 - Copy 'auth' folder into your project.
 - Adopt dependencies.
